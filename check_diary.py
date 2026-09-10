@@ -7,7 +7,7 @@ import html
 import json
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.request import Request, urlopen
@@ -78,14 +78,15 @@ def parse_latest(html_text: str) -> tuple[datetime, str]:
 
 
 def inspect_targets() -> dict:
-    today = datetime.now(JST).date()
+    now = datetime.now(JST)
+    window_start = now - timedelta(hours=2)
     results = {}
     for target in TARGETS:
         timestamp, context = parse_latest(fetch_page(target["url"]))
         results[target["id"]] = {
             "name": target["name"], "url": target["url"],
             "timestamp": timestamp.isoformat(), "context": context[:180],
-            "is_today": timestamp.date() == today,
+            "is_recent": window_start <= timestamp <= now,
         }
         print(f"{target['name']}: latest={timestamp.isoformat()}")
     return results
@@ -123,7 +124,7 @@ def main() -> int:
     previous = json.loads(STATE_FILE.read_text(encoding="utf-8")) if STATE_FILE.exists() else {}
     notifications = []
     for target_id, item in current.items():
-        if item["is_today"] and item["timestamp"] != previous.get(target_id, {}).get("timestamp"):
+        if item["is_recent"] and item["timestamp"] != previous.get(target_id, {}).get("timestamp"):
             notifications.append(
                 f"【{item['name']}】\n投稿時間：{item['timestamp']}\n"
                 f"網址：{item['url']}\n頁面摘要：{item['context']}"
@@ -132,7 +133,7 @@ def main() -> int:
         send_telegram("\n\n".join(notifications))
         print(f"已發送 {len(notifications)} 個目標的 Telegram 写メ日記更新通知。")
     else:
-        print("沒有新的今日写メ日記投稿，不發送 Telegram 通知。")
+        print("沒有最近 2 小時內的新写メ日記投稿，不發送 Telegram 通知。")
     STATE_FILE.parent.mkdir(exist_ok=True)
     STATE_FILE.write_text(json.dumps(current, ensure_ascii=False, indent=2), encoding="utf-8")
     return 0

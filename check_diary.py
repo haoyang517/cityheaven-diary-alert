@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
-"""Check all CityHeaven targets and email today's new diary posts."""
+"""Check all CityHeaven targets and send today's new diary posts to Telegram."""
 
 from __future__ import annotations
 
-import email.message
 import html
 import json
 import os
 import re
-import smtplib
 from datetime import datetime
 from html.parser import HTMLParser
 from pathlib import Path
@@ -93,20 +91,22 @@ def inspect_targets() -> dict:
     return results
 
 
-def send_email(body: str) -> None:
-    required = ["SMTP_HOST", "SMTP_USERNAME", "SMTP_PASSWORD", "NOTIFY_FROM", "NOTIFY_TO"]
+def send_telegram(body: str) -> None:
+    required = ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"]
     missing = [name for name in required if not os.environ.get(name)]
     if missing:
         raise RuntimeError("缺少 GitHub Secrets: " + ", ".join(missing))
-    message = email.message.EmailMessage()
-    message["Subject"] = "CityHeaven 写メ日記更新通知"
-    message["From"] = os.environ["NOTIFY_FROM"]
-    message["To"] = os.environ["NOTIFY_TO"]
-    message.set_content("今天有新的写メ日記投稿。\n\n" + body + "\n")
-    with smtplib.SMTP(os.environ["SMTP_HOST"], int(os.environ.get("SMTP_PORT", "587")), timeout=30) as smtp:
-        smtp.starttls()
-        smtp.login(os.environ["SMTP_USERNAME"], os.environ["SMTP_PASSWORD"])
-        smtp.send_message(message)
+    from urllib.parse import urlencode
+    request = Request(
+        f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_TOKEN']}/sendMessage",
+        data=urlencode({"chat_id": os.environ["TELEGRAM_CHAT_ID"], "text": "CityHeaven 写メ日記更新通知\n\n" + body}).encode(),
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+    with urlopen(request, timeout=30) as response:
+        result = json.loads(response.read().decode())
+    if not result.get("ok"):
+        raise RuntimeError(f"Telegram API 回傳錯誤：{result}")
 
 
 def main() -> int:
@@ -129,10 +129,10 @@ def main() -> int:
                 f"網址：{item['url']}\n頁面摘要：{item['context']}"
             )
     if notifications:
-        send_email("\n\n".join(notifications))
-        print(f"已寄出 {len(notifications)} 個目標的写メ日記更新通知。")
+        send_telegram("\n\n".join(notifications))
+        print(f"已發送 {len(notifications)} 個目標的 Telegram 写メ日記更新通知。")
     else:
-        print("沒有新的今日写メ日記投稿，不寄信。")
+        print("沒有新的今日写メ日記投稿，不發送 Telegram 通知。")
     STATE_FILE.parent.mkdir(exist_ok=True)
     STATE_FILE.write_text(json.dumps(current, ensure_ascii=False, indent=2), encoding="utf-8")
     return 0

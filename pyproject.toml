@@ -1,7 +1,7 @@
 [project]
 name = "cityheaven-diary-alert"
 version = "0.1.0"
-description = "Monitor CityHeaven 写メ日記 and send email alerts"
+description = "Monitor CityHeaven 写メ日記 and send Telegram alerts"
 requires-python = ">=3.12"
 dependencies = []
 

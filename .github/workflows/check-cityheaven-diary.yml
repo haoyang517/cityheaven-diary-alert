@@ -1,0 +1,45 @@
+name: CityHeaven Diary Alert
+
+on:
+  schedule:
+    - cron: "5,35 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      SMTP_HOST: ${{ secrets.SMTP_HOST }}
+      SMTP_PORT: ${{ secrets.SMTP_PORT }}
+      SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      NOTIFY_FROM: ${{ secrets.NOTIFY_FROM }}
+      NOTIFY_TO: ${{ secrets.NOTIFY_TO }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "latest"
+
+      - name: Read latest diaries
+        id: diary
+        env:
+          INSPECT_ONLY: "1"
+        run: uv run check_diary.py
+
+      - name: Check whether these posts were already notified
+        uses: actions/cache@v4
+        with:
+          path: .cityheaven-state
+          key: cityheaven-diary-${{ steps.diary.outputs.fingerprint }}
+          restore-keys: |
+            cityheaven-diary-
+
+      - name: Send notification if needed
+        run: uv run check_diary.py

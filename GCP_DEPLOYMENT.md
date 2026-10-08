@@ -2,7 +2,7 @@
 
 This document records the live GCP setup for this repository. The budget
 shutdown guard, Firestore database, diary monitor, and 30-minute Cloud Scheduler
-job are deployed. The GitHub Actions workflow remains manual-only.
+job are deployed. GCP Scheduler is the only configured production scheduler.
 
 ## Current project
 

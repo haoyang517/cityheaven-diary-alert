@@ -1,6 +1,6 @@
 ## Telegram 測試通知
 
-先在 GitHub Repository Secrets 新增：
+本機測試時，先設定以下環境變數：
 
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_CHAT_ID`：填入你的 Telegram chat ID
@@ -13,4 +13,4 @@ export TELEGRAM_CHAT_ID='你的 chat ID'
 uv run notify_telegram.py
 ```
 
-測試方式二：到 GitHub 的 **Actions → Test Telegram Notification → Run workflow** 手動執行。
+正式環境的 Telegram 憑證由 GCP Secret Manager 提供，設定方式見 `GCP_DEPLOYMENT.md`。

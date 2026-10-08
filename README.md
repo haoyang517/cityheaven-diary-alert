@@ -78,9 +78,3 @@ It runs at minute 5 and 35 of each hour. Stop it with:
 ```bash
 launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.haoyang.cityheaven-diary-alert.plist"
 ```
-
-## GitHub Actions migration
-
-The former automatic cron has been removed. `.github/workflows/check-cityheaven-diary.yml`
-is manual-only for troubleshooting; GCP Scheduler is the production timer.
-`.github/workflows/test-telegram.yml` remains a manual Telegram smoke test.

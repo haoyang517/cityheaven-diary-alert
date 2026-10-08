@@ -2,7 +2,7 @@
 
 TARGETS = [
     {
-        "id": "roses-yuki2",
+        "id": "roses-girl-63866136",
         "name": "水瀬ゆき",
         "profile_url": "https://www.cityheaven.net/tokyo/A1311/A131101/roses/girlid-63866136/?lo=1",
         "diary_source_id": "cityheaven-girlprofile-diary-v1",

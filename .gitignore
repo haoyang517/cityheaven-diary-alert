@@ -2,3 +2,5 @@
 __pycache__/
 .cityheaven-current.json
 .cityheaven-state/
+.env.local
+logs/

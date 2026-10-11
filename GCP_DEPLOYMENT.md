@@ -199,26 +199,17 @@ current CityHeaven parser/source identifiers.
 
 ### Re-deploy after code changes
 
-Run from the repository root. The account is private, and the environment
-variables resolve to fixed secret version 1:
+From the repository root, run the deployment script. It deploys the current
+working tree to the private Cloud Run service and uses fixed Secret Manager
+version 1. You can also invoke the script by its full path from another
+directory:
 
 ```bash
-gcloud run deploy diary-schedule-monitor \
-  --source . \
-  --function check \
-  --base-image python312 \
-  --region asia-east1 \
-  --service-account diary-monitor-runtime@my-crawler-project-510912.iam.gserviceaccount.com \
-  --no-allow-unauthenticated \
-  --cpu 1 \
-  --memory 512Mi \
-  --min 0 \
-  --max 1 \
-  --concurrency 1 \
-  --timeout 300 \
-  --set-env-vars STATE_BACKEND=firestore,FIRESTORE_COLLECTION=monitor_targets \
-  --set-secrets TELEGRAM_BOT_TOKEN=telegram-bot-token:1,TELEGRAM_CHAT_ID=telegram-chat-id:1
+./deploy_gcp.sh
 ```
+
+The script requires the Google Cloud CLI and an account with deployment access
+to the project. It does not commit or push Git changes.
 
 The existing Scheduler job already targets the service URL with that URL as
 the OIDC audience. To inspect it or manually run a normal deduplicated poll:

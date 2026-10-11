@@ -41,6 +41,18 @@ See [GCP_DEPLOYMENT.md](GCP_DEPLOYMENT.md) for live GCP resource settings and
 operations, and [FIRESTORE_SCHEMA.md](FIRESTORE_SCHEMA.md) for the state
 document schema.
 
+## Deploy to GCP
+
+After authenticating with the Google Cloud CLI, deploy the current source tree
+to the configured Cloud Run service with:
+
+```bash
+./deploy_gcp.sh
+```
+
+The script deploys the current local files; commit and push changes separately
+when you want to update GitHub.
+
 ## Tests
 
 Run the parser and notification-flow unit tests locally with:

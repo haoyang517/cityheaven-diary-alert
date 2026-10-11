@@ -183,13 +183,14 @@ The real budget unlink action remains intentionally untested.
 
 ### Profile parser
 
-The CityHeaven profile page contains both the diary entries and its
+The CityHeaven profile page contains the diary entries and may contain its
 server-rendered `#girlprofile_sukkin` attendance schedule. Each poll fetches that
-page once, then parses both sections. A visible `ページがありません` response
-or HTTP 404 is recorded as unavailable and triggers one alert, including on an
-initial run. The alert is suppressed while the page remains unavailable; a
-recovery triggers one message and establishes a fresh baseline. Segretario is
-not used by the deployed monitor.
+page once, then parses both sections. If the schedule section is absent, the
+monitor records the next seven days as days off. A visible `ページがありません`
+response or HTTP 404 is recorded as unavailable and triggers one alert,
+including on an initial run. The alert is suppressed while the page remains
+unavailable; a recovery triggers one message and establishes a fresh baseline.
+Segretario is not used by the deployed monitor.
 
 After revision `diary-schedule-monitor-00009-5dp` was deployed, the 2026-10-08
 06:00 UTC Scheduler invocation returned HTTP 200 on that revision. The

@@ -209,9 +209,15 @@ def _schedule_date(day_text: str, weekday_text: str, today: date) -> date:
 def parse_schedule(html_text: str, today: date | None = None) -> dict[str, str | None]:
     parser = CityHeavenScheduleParser()
     parser.feed(html_text)
-    if not parser.rows:
-        raise RuntimeError("找不到 CityHeaven #girlprofile_sukkin 班表，網站 HTML 可能已改版")
     today = today or datetime.now(JST).date()
+    if not parser.rows:
+        logging.info(
+            "CityHeaven #girlprofile_sukkin is absent; treating the next seven days as days off."
+        )
+        return {
+            (today + timedelta(days=offset)).isoformat(): None
+            for offset in range(7)
+        }
     schedule: dict[str, str | None] = {}
     for row in parser.rows:
         day_text = re.sub(r"\s+", "", row.get("day", ""))
